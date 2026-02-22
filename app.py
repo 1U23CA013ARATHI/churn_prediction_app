@@ -1,34 +1,44 @@
 import streamlit as st
 import pickle
 import pandas as pd
+import numpy as np
 
-# Load new model
-model = pickle.load(open('churn_model.pkl', 'rb'))
+# Page Config
+st.set_page_config(page_title="Churn Predictor", layout="centered")
+
+# Load the saved model
+try:
+    model = pickle.load(open('churn_model.pkl', 'rb'))
+except FileNotFoundError:
+    st.error("Model file not found! Please run train_model.py first.")
 
 st.title("🚀 Advanced Churn Analytics")
+st.markdown("Predict if a customer will leave or stay based on their billing and contract info.")
 
-# Sidebar for inputs
+# Sidebar Inputs
 st.sidebar.header("Customer Information")
 tenure = st.sidebar.slider("Tenure (Months)", 0, 72, 12)
-monthly = st.sidebar.number_input("Monthly Charges ($)", 0, 200, 50)
-total = st.sidebar.number_input("Total Charges ($)", 0, 8000, 500)
-contract = st.sidebar.selectbox("Contract Type", ["Month-to-month", "One year", "Two year"])
+monthly = st.sidebar.number_input("Monthly Charges ($)", 0.0, 200.0, 50.0)
+total = st.sidebar.number_input("Total Charges ($)", 0.0, 8000.0, 500.0)
+contract_type = st.sidebar.selectbox("Contract Type", ['Month-to-month', 'One year', 'Two year'])
 
-# Convert contract to number for model
-contract_val = {'Month-to-month': 0, 'One year': 1, 'Two year': 2}[contract]
+# Encoding input for model
+contract_mapping = {'Month-to-month': 0, 'One year': 1, 'Two year': 2}
+contract_val = contract_mapping[contract_type]
 
+# Prediction Logic
 if st.button("Predict Churn"):
-    prediction = model.predict([[tenure, monthly, total, contract_val]])
+    # Creating input array in the SAME order as training
+    input_data = np.array([[tenure, monthly, total, contract_val]])
+    
+    prediction = model.predict(input_data)
+    prediction_proba = model.predict_proba(input_data)
+
+    st.divider()
     if prediction[0] == 1:
-        st.error("Indha customer poga vaaipu adhigam!")
+        st.error(f"⚠️ **Result: Likely to Churn** (Confidence: {prediction_proba[0][1]:.2%})")
     else:
-        st.success("Indha customer safe-ah irupparu.")
+        st.success(f"✅ **Result: Likely to Stay** (Confidence: {prediction_proba[0][0]:.2%})")
 
-st.divider()
-
-# --- Visualizations ---
-st.subheader("📊 Customer Trends")
-# Dummy data for chart (Ungalukku puriya)
-chart_data = pd.DataFrame({'Charges': [monthly, monthly*0.8, monthly*1.2], 
-                           'Category': ['Current', 'Min', 'Max']})
-st.bar_chart(chart_data.set_index('Category'))
+# Visual context (Optional)
+st.info("Note: Prediction is based on tenure, billing, and contract type.")
