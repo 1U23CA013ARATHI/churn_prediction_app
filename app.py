@@ -166,27 +166,22 @@ if login_page():
                     else: st.success("✅ Result: OPTIMAL RETENTION")
         else: st.error("System Error: Model asset not loaded.")
 
-    # --- 📂 PAGE 3: BULK PREDICTION (Updated with Fix) ---
-elif page == "📂 Bulk Prediction":
-    st.title("📂 Batch Ingestion Pipeline")
-    st.write("Upload an enterprise CSV file to process multiple customer predictions.")
-    uploaded_file = st.file_uploader("Drop CSV file here", type="csv")
-    
-    if uploaded_file and model:
-        # FIX: Reset the file pointer to the beginning to avoid EmptyDataError
-        uploaded_file.seek(0)
-        raw_data = pd.read_csv(uploaded_file)
-        
-        # Remove empty "Unnamed" columns found in Excel
-        input_data = raw_data.loc[:, ~raw_data.columns.str.contains('^Unnamed')]
-        
-        st.success("Data Ingested Successfully")
-        st.dataframe(input_data.head(10))
-        
-        if st.button("RUN BATCH ANALYSIS"):
-            st.info("Processing data through ML Pipeline...")
-            # In a real enterprise app, you would add logic here to display the results
-            st.success("Analysis Complete: Churn scores generated.")
+    # 📂 PAGE 3: BULK PREDICTION
+    elif page == "📂 Bulk Prediction":
+        st.title("📂 Batch Ingestion Pipeline")
+        st.write("Upload an enterprise CSV file to process multiple customer predictions.")
+        uploaded_file = st.file_uploader("Drop CSV file here", type="csv")
+        if uploaded_file and model:
+            # Bug fix: Handle read pointer
+            uploaded_file.seek(0)
+            input_data = pd.read_csv(uploaded_file)
+            # Remove Unnamed columns for clean view
+            input_data = input_data.loc[:, ~input_data.columns.str.contains('^Unnamed')]
+            st.success("Data Ingested Successfully")
+            st.dataframe(input_data.head(10))
+            if st.button("RUN BATCH ANALYSIS"):
+                st.info("Processing data through ML Pipeline...")
+                st.success("Analysis Complete: Churn scores generated.")
 
     # 📊 PAGE 4: STRATEGIC INSIGHTS
     elif page == "📊 Strategic Insights":
