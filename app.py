@@ -133,7 +133,7 @@ if login_page():
         st.markdown("<h1 style='color:#001f3f; text-align:center;'>Customer Retention Analysis System</h1>", unsafe_allow_html=True)
         c1, c2 = st.columns([3, 2])
         with c1:
-            st.subheader("Welcome to the Professional Portal")
+            st.subheader("Welcome to the Portal")
             st.write("""
             ChurnGuard AI is a sophisticated tool designed to help businesses reduce customer attrition. 
             By leveraging **Random Forest Machine Learning**, we identify customers likely to leave 
