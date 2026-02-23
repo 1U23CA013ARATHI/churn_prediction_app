@@ -101,7 +101,7 @@ with st.sidebar:
                      "📜 Project Blueprint"])
     
     st.divider()
-    st.markdown(f"👤 **Lead Analyst:** 1U23CA013ARATHI")
+    st.markdown(f"👤1U23CA013")
     st.markdown(f"📅 **Release:** 22-02-2026")
     
     # Logout Button with the new color
@@ -132,9 +132,14 @@ elif page == "🔮 AI Prediction":
         with st.form("prediction_form"):
             col1, col2 = st.columns(2)
             tenure = col1.slider("Service Tenure (Months)", 0, 72, 12)
-            monthly = col1.number_input("Monthly Subscription Fee ($)", 0.0, 200.0, 65.0)
+            
+            # UPDATED TO INR (₹)
+            monthly = col1.number_input("Monthly Subscription Fee (₹)", 0.0, 20000.0, 1500.0)
+            
             contract = col2.selectbox("Contractual Agreement", ['Month-to-month', 'One year', 'Two year'])
-            total = col2.number_input("Total Charges ($)", 0.0, 10000.0, 500.0)
+            
+            # UPDATED TO INR (₹)
+            total = col2.number_input("Total Charges (₹)", 0.0, 1000000.0, 15000.0)
             
             if st.form_submit_button("CALCULATE CHURN RISK"):
                 c_map = {'Month-to-month': 0, 'One year': 1, 'Two year': 2}
@@ -217,7 +222,7 @@ elif page == "⚙️ Model Analytics":
 elif page == "📜 Project Blueprint":
     st.balloons() # Interactive celebratory effect
     st.markdown("<h1 style='color: #001f3f; text-align: center;'>📜 Technical Project Blueprint</h1>", unsafe_allow_html=True)
-    st.info(f"**Principal System Architect:** 1U23CA013ARATHI")
+    st.info(f"1U23CA013")
 
     st.markdown("""
     <div class="blueprint-card">
