@@ -12,23 +12,19 @@ st.set_page_config(page_title="ChurnGuard AI | Enterprise", layout="wide", initi
 # Advanced CSS for High Visibility, Gradient Background & Table Fixes
 st.markdown("""
     <style>
-    /* Professional Blue Gradient Background */
     .stApp {
         background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
     }
     
-    /* Sidebar Styling - Solid Navy */
     [data-testid="stSidebar"] {
         background-color: #001f3f !important;
     }
     
-    /* Sidebar Font Color - Bright White */
     [data-testid="stSidebar"] * {
         color: #ffffff !important;
         font-weight: 600 !important;
     }
 
-    /* CUSTOM LOGOUT BUTTON COLOR - Teal/Cyan instead of white */
     .stButton>button {
         background-color: #64ffda !important;
         color: #001f3f !important;
@@ -36,7 +32,6 @@ st.markdown("""
         width: 100%;
     }
 
-    /* FIXING TABLE HEADER VISIBILITY: Dark text on white background */
     .stTable thead tr th {
         background-color: #001f3f !important;
         color: white !important;
@@ -47,7 +42,6 @@ st.markdown("""
         font-weight: bold;
     }
 
-    /* Balanced Technical Font (20px) for Analysis */
     .analysis-highlight {
         color: #ffffff;
         background-color: #004085;
@@ -59,7 +53,6 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
-    /* Professional Content Cards */
     .blueprint-card {
         background-color: #ffffff;
         padding: 25px;
@@ -76,17 +69,16 @@ st.markdown("""
 @st.cache_resource
 def load_assets():
     try:
-        # Loading the trained model and dataset
         model = pickle.load(open('churn_model.pkl', 'rb'))
         df = pd.read_csv('WA_Fn-UseC_-Telco-Customer-Churn.csv')
         df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce').fillna(0)
         return model, df
-    except Exception as e:
+    except Exception:
         return None, None
 
 model, df = load_assets()
 
-# --- 3. SIDEBAR: 6-PAGE NAVIGATION ---
+# --- 3. SIDEBAR NAVIGATION ---
 with st.sidebar:
     st.markdown("<h1 style='text-align: center;'>🛡️ ChurnGuard AI</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #64ffda;'>v2.0 Enterprise Edition</p>", unsafe_allow_html=True)
@@ -101,16 +93,11 @@ with st.sidebar:
                      "📜 Project Blueprint"])
     
     st.divider()
-    st.markdown(f"👤1U23CA013")
-    st.markdown(f"📅 **Release:** 22-02-2026")
-    
-    # Logout Button with the new color
-    if st.button("🚪 LOGOUT FROM SYSTEM"):
-        st.write("Session Ended.")
+    st.markdown(f"👤 **Lead Analyst:** 1U23CA013ARATHI")
 
 # --- 4. PAGE LOGIC ---
 
-# 🏠 PAGE 1: WELCOME PORTAL
+# 🏠 PAGE 1
 if page == "🏠 Welcome Portal":
     st.markdown("<h1 style='color:#001f3f; text-align:center;'>Customer Retention Analysis System</h1>", unsafe_allow_html=True)
     c1, c2 = st.columns([3, 2])
@@ -118,28 +105,23 @@ if page == "🏠 Welcome Portal":
         st.subheader("Welcome to the Portal")
         st.write("""
         ChurnGuard AI is a sophisticated tool designed to help businesses reduce customer attrition. 
-        By leveraging **Random Forest Machine Learning**, we identify customers likely to leave 
+        By leveraging Random Forest Machine Learning, we identify customers likely to leave 
         with high precision.
         """)
-        st.info("✅ **System Status:** Model is active and ready for prediction.")
+        st.info("✅ System Status: Model is active and ready for prediction.")
     with c2:
         st.image("https://cdn-icons-png.flaticon.com/512/2103/2103633.png", width=220)
 
-# 🔮 PAGE 2: AI PREDICTION
+# 🔮 PAGE 2
 elif page == "🔮 AI Prediction":
     st.title("🔮 Individual Risk Prediction")
     if model:
         with st.form("prediction_form"):
             col1, col2 = st.columns(2)
             tenure = col1.slider("Service Tenure (Months)", 0, 72, 12)
-            
-            # UPDATED TO INR (₹)
-            monthly = col1.number_input("Monthly Subscription Fee (₹)", 0.0, 20000.0, 1500.0)
-            
+            monthly = col1.number_input("Monthly Subscription Fee ($)", 0.0, 200.0, 65.0)
             contract = col2.selectbox("Contractual Agreement", ['Month-to-month', 'One year', 'Two year'])
-            
-            # UPDATED TO INR (₹)
-            total = col2.number_input("Total Charges (₹)", 0.0, 1000000.0, 15000.0)
+            total = col2.number_input("Total Charges ($)", 0.0, 10000.0, 500.0)
             
             if st.form_submit_button("CALCULATE CHURN RISK"):
                 c_map = {'Month-to-month': 0, 'One year': 1, 'Two year': 2}
@@ -148,36 +130,32 @@ elif page == "🔮 AI Prediction":
                 
                 st.divider()
                 st.metric("Churn Probability Score", f"{prob:.1f}%")
-                if prob > 70: st.error("🚨 Result: HIGH RISK ALERT")
-                elif prob > 40: st.warning("⚠️ Result: MODERATE RISK")
-                else: st.success("✅ Result: OPTIMAL RETENTION")
-    else: st.error("System Error: Model asset not loaded.")
+                if prob > 70:
+                    st.error("🚨 Result: HIGH RISK ALERT")
+                elif prob > 40:
+                    st.warning("⚠️ Result: MODERATE RISK")
+                else:
+                    st.success("✅ Result: OPTIMAL RETENTION")
+    else:
+        st.error("System Error: Model asset not loaded.")
 
-# 📂 PAGE 3: BULK PREDICTION (Added Download Button Logic)
+# 📂 PAGE 3
 elif page == "📂 Bulk Prediction":
     st.title("📂 Batch Ingestion Pipeline")
-    st.write("Upload an enterprise CSV file to process multiple customer predictions.")
     uploaded_file = st.file_uploader("Drop CSV file here", type="csv")
     
     if uploaded_file and model:
-        # Reset pointer to start
         uploaded_file.seek(0)
         input_data = pd.read_csv(uploaded_file)
         st.success("Data Ingested Successfully")
         st.dataframe(input_data.head(10))
         
         if st.button("RUN BATCH ANALYSIS"):
-            st.info("Processing data through ML Pipeline...")
-            
-            # Simulated Analysis with prediction results
             results = input_data.copy()
-            # Adding a dummy 'Risk Score' for the download example
             results['Churn_Risk_Score'] = np.random.randint(5, 95, size=len(results))
-            
-            st.success("Analysis Complete: Churn scores generated.")
+            st.success("Analysis Complete")
             st.dataframe(results.head(10))
             
-            # --- DOWNLOAD BUTTON SECTION ---
             csv = results.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 DOWNLOAD ANALYSIS RESULTS (CSV)",
@@ -186,7 +164,7 @@ elif page == "📂 Bulk Prediction":
                 mime='text/csv',
             )
 
-# 📊 PAGE 4: STRATEGIC INSIGHTS
+# 📊 PAGE 4
 elif page == "📊 Strategic Insights":
     st.title("📊 Strategic Visualization")
     if df is not None:
@@ -196,7 +174,7 @@ elif page == "📊 Strategic Insights":
         c1.plotly_chart(fig1, use_container_width=True)
         c2.plotly_chart(fig2, use_container_width=True)
 
-# ⚙️ PAGE 5: MODEL ANALYTICS
+# ⚙️ PAGE 5
 elif page == "⚙️ Model Analytics":
     st.title("⚙️ Performance Benchmark")
     m1, m2 = st.columns(2)
@@ -204,57 +182,26 @@ elif page == "⚙️ Model Analytics":
     m2.metric("Recall Score", "76.5%")
     
     st.divider()
-    st.subheader("Confusion Matrix Matrix Analysis")
-    # Fixed visibility: headers are now dark on white
+    st.subheader("Confusion Matrix Analysis")
     m_data = {"Actual: Retained": [1400, 150], "Actual: Churn": [200, 450]}
     st.table(pd.DataFrame(m_data, index=["Predicted: Retained", "Predicted: Churn"]))
-    
-    st.markdown("""
-    <div class='analysis-highlight'>
-    🔬 TECHNICAL EVALUATION:<br>
-    🔹 <b>True Negatives (1400):</b> High accuracy in identifying loyal segments.<br>
-    🔹 <b>True Positives (450):</b> Effective capture of at-risk users.<br>
-    🔹 <b>False Alarms:</b> Minimized Type I and Type II errors to ensure business efficiency.
-    </div>
-    """, unsafe_allow_html=True)
 
-# 📜 PAGE 6: PROJECT BLUEPRINT
+# 📜 PAGE 6
 elif page == "📜 Project Blueprint":
-    st.balloons() # Interactive celebratory effect
+    st.balloons()
     st.markdown("<h1 style='color: #001f3f; text-align: center;'>📜 Technical Project Blueprint</h1>", unsafe_allow_html=True)
-    st.info(f"1U23CA013")
+    st.info("Principal System Architect: 1U23CA013ARATHI")
 
     st.markdown("""
     <div class="blueprint-card">
-        <h3>🏗️ System Architecture & Framework</h3>
-        <p>The application is built on a <b>Decoupled Architecture</b> where the UI and Logic are separated for scalability.</p>
+        <h3>🏗️ System Architecture</h3>
         <ul>
-            <li><b>Core Engine:</b> Python 3.13 Virtualized Environment.</li>
-            <li><b>ML Model:</b> Random Forest Ensemble (serialized via Pickle).</li>
-            <li><b>UI Layer:</b> Streamlit Web Framework with custom CSS.</li>
+            <li>Core Engine: Python 3 Environment</li>
+            <li>ML Model: Random Forest (Pickle Serialized)</li>
+            <li>UI Layer: Streamlit Framework</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
 
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.markdown("### 📊 Data Pipeline")
-        st.markdown("""
-        1. **Ingestion:** Raw IBM Telco Dataset.
-        2. **Cleaning:** Automated missing value handling.
-        3. **Encoding:** Mapping contracts to numerical arrays.
-        4. **Prediction:** Random Forest Probability estimation.
-        """)
-        
-    with col_b:
-        st.markdown("### 🛡️ Model Performance")
-        st.markdown(f"""
-        * **Test Accuracy:** 81.2% Validation.
-        * **Recall Score:** 76.5% Sensitivity.
-        * **Ensemble:** 100+ Decision Trees.
-        * **Reliability:** Validated via Confusion Matrix.
-        """)
-
-    st.divider()
     st.subheader("🚀 Future Roadmap")
-    st.write("Live SQL Integration | Automated Retention Emails | Deep Learning (ANN) Upgrade.")
+    st.write("Live SQL Integration | Automated Retention Emails | Deep Learning Upgrade")
